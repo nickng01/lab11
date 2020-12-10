@@ -1,0 +1,64 @@
+import sqlite3
+import base64
+import webbrowser
+# Create a SQL connection to our SQLite database
+con = sqlite3.connect('week11.db')
+cur = con.cursor()
+
+
+def getID(target_ID):
+    link_rows = cur.execute(
+        "SELECT link FROM lab10 WHERE id = ?",
+        (target_ID,),
+    ).fetchall()
+    return link_rows
+
+def joinLinktoList(link_rows):
+    joinLinkList = ' '.join([str(elem) for elem in link_rows])
+    return joinLinkList
+
+def encode(joinLinkList):
+    base64_bytes = joinLinkList.encode('ascii')
+    message_bytes = base64.b64decode(base64_bytes)
+    link = message_bytes.decode('ascii')
+    return link
+def openbrowser(link):
+    return webbrowser.open(link)
+
+def main(target_ID):
+    idCode = joinLinktoList(getID(target_ID))
+    openLink = encode(idCode)
+    openbrowser(openLink)
+def updateC(place):
+  try:
+    sql_update = ''' UPDATE lab10 
+            SET city = ?,
+                country = ?
+            WHERE id = ?
+        '''
+    cur.execute(sql_update, place)
+    con.commit()
+    print('Complete')
+  except:
+      print('Fail')
+userInput = input('Select for 1 to 24 or "q" to quit: ')
+cityInput = input('City: ')
+countryInput = input('country: ')
+place = (cityInput,countryInput,userInput)
+if userInput.isdigit():
+    userInput = int(userInput)
+    if userInput in range(1,24):
+        updateC(place)
+        main(userInput)
+    else:
+        userInput = input('Please select between 1 and 24 or "q" to quit: ')
+        updateC(place)
+        main(userInput)
+elif userInput == 'q':
+    exit()
+else:
+    userInput = input('Please select between 1 and 24 or "q" to quit: ')
+    main(userInput)
+
+
+
